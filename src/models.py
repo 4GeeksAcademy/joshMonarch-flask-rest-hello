@@ -8,12 +8,12 @@ db = SQLAlchemy()
 
 
 class User(db.Model):
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     email: Mapped[str] = mapped_column(
         String(120), unique=True, nullable=False)
     firstname: Mapped[str] = mapped_column(String(20), nullable=False)
     lastname: Mapped[str] = mapped_column(String(20), nullable=False)
-    password: Mapped[str] = mapped_column(nullable=False)
+    password: Mapped[str] = mapped_column(String(20), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False)
 
     posts: Mapped[List["Post"]] = relationship(back_populates="user")
@@ -34,9 +34,9 @@ class User(db.Model):
 follower = Table(
     "follower",
     db.metadata,
-    Column("id", primary_key=True),
-    Column("user_from_id", ForeignKey("user.id"), nullable=True),
-    Column("user_to_id", ForeignKey("user.id"), nullable=True))
+    Column("id", db.Integer, primary_key=True),
+    Column("user_from_id", db.Integer, ForeignKey("user.id"), nullable=False),
+    Column("user_to_id", db.Integer, ForeignKey("user.id"), nullable=False))
 
 
 class MediaType(enum.Enum):
@@ -46,11 +46,11 @@ class MediaType(enum.Enum):
 
 
 class Media(db.Model):
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     type: Mapped[str] = mapped_column(Enum(MediaType), nullable=False)
     url: Mapped[str] = mapped_column(String(120), nullable=False)
     post_id: Mapped[int] = mapped_column(
-        ForeignKey("post.id"), nullable=False)
+        db.Integer, ForeignKey("post.id"), nullable=False)
 
     post = relationship("Post", back_populates="media")
 
@@ -64,8 +64,8 @@ class Media(db.Model):
 
 
 class Post(db.Model):
-    id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(db.Integer, ForeignKey("user.id"))
 
     user = relationship("User", back_populates="post")
     comments = relationship("Comment", back_populates="post")
@@ -79,12 +79,12 @@ class Post(db.Model):
 
 
 class Comment(db.Model):
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True)
     comment_text: Mapped[str] = mapped_column(String(500), nullable=False)
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("user.id"), nullable=False)
+        db.Integer, ForeignKey("user.id"), nullable=False)
     post_id: Mapped[int] = mapped_column(
-        ForeignKey("post.id"), nullable=False)
+        db.Integer, ForeignKey("post.id"), nullable=False)
 
     user = relationship("User", back_populates="comments")
     post = relationship("Post", back_populates="comments")
